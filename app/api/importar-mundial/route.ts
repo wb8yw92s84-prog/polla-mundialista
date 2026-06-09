@@ -17,7 +17,7 @@ export async function GET() {
   }
 
   const response = await fetch(
-    `https://api.sportmonks.com/v3/football/fixtures/seasons/26618?api_token=${token}&include=participants;venue`
+    `https://api.sportmonks.com/v3/football/fixtures?api_token=${token}&include=participants;venue&filters=fixtureSeasons:26618&per_page=50`
   )
 
   const json = await response.json()
