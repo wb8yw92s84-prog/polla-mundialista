@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../lib/supabase'
-import { calcularTablasPorGrupo } from '../lib/simulador'
+import { calcularTablasPorGrupo, resolverNombreEquipo } from '../lib/simulador'
 
 export default function PronosticosPage() {
   const router = useRouter()
@@ -312,9 +312,9 @@ export default function PronosticosPage() {
       <div className="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
         <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-4">
           <div className="flex items-center gap-3">
-            <span className="text-4xl">{bandera(partido.equipo_local)}</span>
+            <span className="text-4xl">{bandera(resolverNombreEquipo(partido.equipo_local, tablasPorGrupo))}</span>
             <span className="text-xl font-black text-gray-900">
-              {partido.equipo_local}
+              {resolverNombreEquipo(partido.equipo_local, tablasPorGrupo)}
             </span>
           </div>
 
@@ -366,9 +366,9 @@ export default function PronosticosPage() {
 
           <div className="flex items-center justify-start md:justify-end gap-3">
             <span className="text-xl font-black text-gray-900">
-              {partido.equipo_visitante}
+              {resolverNombreEquipo(partido.equipo_visitante, tablasPorGrupo)}
             </span>
-            <span className="text-4xl">{bandera(partido.equipo_visitante)}</span>
+            <span className="text-4xl">{bandera(resolverNombreEquipo(partido.equipo_visitante, tablasPorGrupo))}</span>
           </div>
         </div>
 

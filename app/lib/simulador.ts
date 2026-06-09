@@ -88,3 +88,26 @@ function crearEquipo(nombre: string) {
     pts: 0,
   }
 }
+export function resolverNombreEquipo(nombre: string, tablasPorGrupo: any) {
+  if (!nombre) return nombre
+
+  const texto = nombre.trim()
+
+  if (texto.startsWith('Ganador Grupo ')) {
+    const letra = texto.replace('Ganador Grupo ', '')
+    const grupo = `Grupo ${letra}`
+    return tablasPorGrupo[grupo]?.[0]?.nombre || texto
+  }
+
+  if (texto.startsWith('Segundo Grupo ')) {
+    const letra = texto.replace('Segundo Grupo ', '')
+    const grupo = `Grupo ${letra}`
+    return tablasPorGrupo[grupo]?.[1]?.nombre || texto
+  }
+
+  if (texto === 'Mejor tercero') {
+    return 'Mejor tercero'
+  }
+
+  return texto
+}
