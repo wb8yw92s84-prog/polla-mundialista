@@ -8,6 +8,7 @@ export default function AdminPage() {
   const router = useRouter()
 
   const [partidos, setPartidos] = useState<any[]>([])
+  const [usuariosPendientes, setUsuariosPendientes] = useState<any[]>([])
   const [resultados, setResultados] = useState<any>({})
   const [cargando, setCargando] = useState(true)
 
@@ -21,6 +22,7 @@ export default function AdminPage() {
 
     setCargando(false)
     cargarPartidos()
+    cargarUsuariosPendientes()
   }
 
   async function cerrarSesion() {
@@ -31,6 +33,30 @@ export default function AdminPage() {
   async function cargarPartidos() {
     const { data } = await supabase.from('partidos').select('*')
     setPartidos(data || [])
+  }
+
+  async function cargarUsuariosPendientes() {
+    const { data } = await supabase
+      .from('usuarios')
+      .select('*')
+      .eq('aprobado', false)
+
+    setUsuariosPendientes(data || [])
+  }
+
+  async function aprobarUsuario(usuarioId: string) {
+    const { error } = await supabase
+      .from('usuarios')
+      .update({ aprobado: true })
+      .eq('id', usuarioId)
+
+    if (error) {
+      alert('Error aprobando usuario: ' + error.message)
+      return
+    }
+
+    alert('Participante aprobado correctamente')
+    cargarUsuariosPendientes()
   }
 
   function calcularPuntos(
@@ -111,7 +137,7 @@ export default function AdminPage() {
 
   return (
     <main className="min-h-screen bg-slate-900 text-white p-10">
-      <div className="max-w-2xl mx-auto flex justify-between items-center mb-8">
+      <div className="max-w-3xl mx-auto flex justify-between items-center mb-8">
         <h1 className="text-4xl font-bold">
           Panel Admin
         </h1>
@@ -124,7 +150,36 @@ export default function AdminPage() {
         </button>
       </div>
 
-      <div className="bg-white text-black max-w-2xl mx-auto rounded-xl p-6">
+      <div className="bg-white text-black max-w-3xl mx-auto rounded-xl p-6 mb-8">
+        <h2 className="text-2xl font-bold mb-4">
+          Solicitudes pendientes
+        </h2>
+
+        {usuariosPendientes.length === 0 ? (
+          <p>No hay participantes pendientes.</p>
+        ) : (
+          usuariosPendientes.map((usuario) => (
+            <div
+              key={usuario.id}
+              className="flex justify-between items-center border-b py-3"
+            >
+              <div>
+                <p className="font-bold">{usuario.nombre}</p>
+                <p className="text-sm text-gray-600">{usuario.email}</p>
+              </div>
+
+              <button
+                onClick={() => aprobarUsuario(usuario.id)}
+                className="bg-green-700 text-white px-4 py-2 rounded-lg"
+              >
+                Aprobar
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+
+      <div className="bg-white text-black max-w-3xl mx-auto rounded-xl p-6">
         <h2 className="text-2xl font-bold mb-4">
           Resultados Oficiales
         </h2>
