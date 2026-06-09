@@ -75,6 +75,19 @@ export default function PronosticosPage() {
     return new Date() >= cierre
   }
 
+  function normalizarFase(partido: any) {
+    const numero = Number(partido.numero_partido)
+
+    if (numero >= 1 && numero <= 72) return 'Grupos'
+    if (numero >= 73 && numero <= 88) return '16avos'
+    if (numero >= 89 && numero <= 96) return '8vos'
+    if (numero >= 97 && numero <= 100) return 'Cuartos'
+    if (numero >= 101 && numero <= 102) return 'Semifinales'
+    if (numero >= 103 && numero <= 104) return 'Final'
+
+    return 'Grupos'
+  }
+
   async function cargarDatos(idUsuario: string) {
     const { data: partidosData } = await supabase
       .from('partidos')
@@ -183,27 +196,13 @@ export default function PronosticosPage() {
     return `${index + 1}.`
   }
 
-  function normalizarFase(partido: any) {
-    const texto = `${partido.grupo || ''} ${partido.fase || ''}`.toLowerCase()
-
-    if (texto.includes('grupo')) return 'Grupos'
-    if (texto.includes('dieciseisavos')) return '16avos'
-    if (texto.includes('octavos')) return '8vos'
-    if (texto.includes('cuartos')) return 'Cuartos'
-    if (texto.includes('semi')) return 'Semifinales'
-    if (texto.includes('tercer')) return 'Final'
-    if (texto.includes('final')) return 'Final'
-
-    return 'Grupos'
-  }
-
   function obtenerGrupos() {
     const grupos: any = {}
 
     partidos
       .filter((p) => normalizarFase(p) === 'Grupos')
       .forEach((partido) => {
-        const nombre = partido.grupo || 'Sin grupo'
+        const nombre = partido.grupo || 'Otros'
         if (!grupos[nombre]) grupos[nombre] = []
         grupos[nombre].push(partido)
       })
@@ -228,7 +227,15 @@ export default function PronosticosPage() {
     ]
 
     return Object.keys(grupos)
-      .sort((a, b) => orden.indexOf(a) - orden.indexOf(b))
+      .sort((a, b) => {
+        const ia = orden.indexOf(a)
+        const ib = orden.indexOf(b)
+
+        if (ia === -1 && ib === -1) return a.localeCompare(b)
+        if (ia === -1) return 1
+        if (ib === -1) return -1
+        return ia - ib
+      })
       .map((nombre) => ({
         nombre,
         partidos: grupos[nombre].sort(
@@ -452,11 +459,17 @@ export default function PronosticosPage() {
               </span>
             </div>
 
-            <div className="grid grid-cols-1 gap-4">
-              {obtenerPartidosPorVista().map((partido: any) => (
-                <TarjetaPartido key={partido.id} partido={partido} />
-              ))}
-            </div>
+            {obtenerPartidosPorVista().length === 0 ? (
+              <p className="text-gray-600">
+                No hay partidos registrados en esta fase.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 gap-4">
+                {obtenerPartidosPorVista().map((partido: any) => (
+                  <TarjetaPartido key={partido.id} partido={partido} />
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
