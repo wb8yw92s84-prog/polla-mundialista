@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
 import { useRouter } from 'next/navigation'
+import { supabase } from '../lib/supabase'
 
 export default function AdminPage() {
   const router = useRouter()
@@ -20,26 +20,32 @@ export default function AdminPage() {
       return
     }
 
+    await cargarPartidos()
+    await cargarUsuariosPendientes()
     setCargando(false)
-    cargarPartidos()
-    cargarUsuariosPendientes()
-  }
-
-  async function cerrarSesion() {
-    await supabase.auth.signOut()
-    router.push('/adminlogin')
   }
 
   async function cargarPartidos() {
-    const { data } = await supabase.from('partidos').select('*')
+    const { data, error } = await supabase.from('partidos').select('*')
+
+    if (error) {
+      alert('Error cargando partidos: ' + error.message)
+      return
+    }
+
     setPartidos(data || [])
   }
 
   async function cargarUsuariosPendientes() {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('usuarios')
       .select('*')
       .eq('aprobado', false)
+
+    if (error) {
+      alert('Error cargando solicitudes: ' + error.message)
+      return
+    }
 
     setUsuariosPendientes(data || [])
   }
@@ -51,12 +57,17 @@ export default function AdminPage() {
       .eq('id', usuarioId)
 
     if (error) {
-      alert('Error aprobando usuario: ' + error.message)
+      alert('Error aprobando participante: ' + error.message)
       return
     }
 
     alert('Participante aprobado correctamente')
     cargarUsuariosPendientes()
+  }
+
+  async function cerrarSesion() {
+    await supabase.auth.signOut()
+    router.push('/adminlogin')
   }
 
   function calcularPuntos(
@@ -65,9 +76,7 @@ export default function AdminPage() {
     realLocal: number,
     realVisitante: number
   ) {
-    if (pronLocal === realLocal && pronVisitante === realVisitante) {
-      return 5
-    }
+    if (pronLocal === realLocal && pronVisitante === realVisitante) return 5
 
     const pronGanador =
       pronLocal > pronVisitante
@@ -138,9 +147,7 @@ export default function AdminPage() {
   return (
     <main className="min-h-screen bg-slate-900 text-white p-10">
       <div className="max-w-3xl mx-auto flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold">
-          Panel Admin
-        </h1>
+        <h1 className="text-4xl font-bold">Panel Admin</h1>
 
         <button
           onClick={cerrarSesion}
@@ -151,9 +158,7 @@ export default function AdminPage() {
       </div>
 
       <div className="bg-white text-black max-w-3xl mx-auto rounded-xl p-6 mb-8">
-        <h2 className="text-2xl font-bold mb-4">
-          Solicitudes pendientes
-        </h2>
+        <h2 className="text-2xl font-bold mb-4">Solicitudes pendientes</h2>
 
         {usuariosPendientes.length === 0 ? (
           <p>No hay participantes pendientes.</p>
@@ -180,9 +185,7 @@ export default function AdminPage() {
       </div>
 
       <div className="bg-white text-black max-w-3xl mx-auto rounded-xl p-6">
-        <h2 className="text-2xl font-bold mb-4">
-          Resultados Oficiales
-        </h2>
+        <h2 className="text-2xl font-bold mb-4">Resultados Oficiales</h2>
 
         {partidos.map((partido) => (
           <div key={partido.id} className="border-b py-4">
