@@ -13,6 +13,78 @@ export default function PronosticosPage() {
   const [ranking, setRanking] = useState<any[]>([])
   const [pronosticos, setPronosticos] = useState<any>({})
 
+  const banderas: any = {
+    Ecuador: '🇪🇨',
+    Argentina: '🇦🇷',
+    Brasil: '🇧🇷',
+    Uruguay: '🇺🇾',
+    Paraguay: '🇵🇾',
+    Colombia: '🇨🇴',
+    Chile: '🇨🇱',
+    Perú: '🇵🇪',
+    Bolivia: '🇧🇴',
+    Venezuela: '🇻🇪',
+
+    México: '🇲🇽',
+    Canadá: '🇨🇦',
+    'Estados Unidos': '🇺🇸',
+    Panamá: '🇵🇦',
+    Honduras: '🇭🇳',
+    'Costa Rica': '🇨🇷',
+    Jamaica: '🇯🇲',
+
+    España: '🇪🇸',
+    Francia: '🇫🇷',
+    Alemania: '🇩🇪',
+    Inglaterra: '🏴',
+    Escocia: '🏴',
+    Gales: '🏴',
+    Portugal: '🇵🇹',
+    Italia: '🇮🇹',
+    Bélgica: '🇧🇪',
+    'Países Bajos': '🇳🇱',
+    Suiza: '🇨🇭',
+    Croacia: '🇭🇷',
+    Suecia: '🇸🇪',
+    Noruega: '🇳🇴',
+    Dinamarca: '🇩🇰',
+    Turquía: '🇹🇷',
+    'República Checa': '🇨🇿',
+    Polonia: '🇵🇱',
+    Austria: '🇦🇹',
+    Serbia: '🇷🇸',
+    Ucrania: '🇺🇦',
+    Rumania: '🇷🇴',
+    Grecia: '🇬🇷',
+
+    Marruecos: '🇲🇦',
+    Egipto: '🇪🇬',
+    Túnez: '🇹🇳',
+    Argelia: '🇩🇿',
+    'Costa de Marfil': '🇨🇮',
+    Sudáfrica: '🇿🇦',
+    Nigeria: '🇳🇬',
+    Camerún: '🇨🇲',
+    Senegal: '🇸🇳',
+    Ghana: '🇬🇭',
+
+    Japón: '🇯🇵',
+    'Corea del Sur': '🇰🇷',
+    Australia: '🇦🇺',
+    'Nueva Zelanda': '🇳🇿',
+    China: '🇨🇳',
+    'Arabia Saudita': '🇸🇦',
+    Irán: '🇮🇷',
+    Catar: '🇶🇦',
+    'Emiratos Árabes Unidos': '🇦🇪',
+
+    'Por definir': '🏳️',
+  }
+
+  function bandera(nombre: string) {
+    return banderas[nombre] || '🏳️'
+  }
+
   async function cargarDatos(idUsuario: string) {
     const { data: partidosData } = await supabase
       .from('partidos')
@@ -154,6 +226,13 @@ export default function PronosticosPage() {
       }))
   }
 
+  function medalla(index: number) {
+    if (index === 0) return '🥇'
+    if (index === 1) return '🥈'
+    if (index === 2) return '🥉'
+    return `${index + 1}.`
+  }
+
   useEffect(() => {
     const id = localStorage.getItem('usuario_id')
     const nombre = localStorage.getItem('usuario_nombre')
@@ -169,29 +248,32 @@ export default function PronosticosPage() {
   }, [])
 
   return (
-    <main className="min-h-screen bg-green-900 text-white px-4 py-8">
-      <div className="max-w-5xl mx-auto mb-8">
+    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-green-950 to-emerald-900 text-white px-4 py-8">
+      <div className="max-w-6xl mx-auto mb-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-3xl md:text-5xl font-bold">
-              🏆 Polla Mundialista 2026
+            <p className="uppercase tracking-[0.3em] text-yellow-400 text-sm font-bold">
+              Mundial 2026
+            </p>
+            <h1 className="text-4xl md:text-6xl font-black mt-2">
+              🏆 Polla Mundialista
             </h1>
-            <p className="text-green-100 mt-2">
-              Pronósticos por grupos y fases
+            <p className="text-green-100 mt-3 text-lg">
+              Pronósticos por grupos, fases y ranking en vivo.
             </p>
           </div>
 
           <button
             onClick={cerrarSesion}
-            className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg"
+            className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-full font-bold shadow"
           >
             Salir
           </button>
         </div>
       </div>
 
-      <div className="bg-white text-black max-w-5xl mx-auto rounded-2xl p-6 mb-8 shadow-lg">
-        <h2 className="text-2xl font-bold">
+      <div className="bg-white/95 text-black max-w-6xl mx-auto rounded-3xl p-6 mb-8 shadow-2xl border border-yellow-300">
+        <h2 className="text-2xl font-black">
           Bienvenido, {usuarioNombre}
         </h2>
         <p className="text-gray-700 mt-1">
@@ -199,44 +281,48 @@ export default function PronosticosPage() {
         </p>
       </div>
 
-      <div className="max-w-5xl mx-auto mb-8">
+      <div className="max-w-6xl mx-auto mb-8">
         {partidos.length === 0 ? (
-          <div className="bg-white text-black rounded-2xl p-6">
+          <div className="bg-white text-black rounded-3xl p-6">
             <p>No hay partidos registrados.</p>
           </div>
         ) : (
           obtenerSecciones().map((seccion) => (
             <div
               key={seccion.nombre}
-              className="bg-white text-black rounded-2xl p-6 mb-8 shadow-lg"
+              className="bg-white/95 text-black rounded-3xl p-5 md:p-7 mb-8 shadow-2xl border border-white"
             >
-              <h2 className="text-3xl font-bold mb-6 text-green-800 border-b pb-3">
-                {seccion.nombre}
-              </h2>
+              <div className="flex items-center justify-between border-b pb-4 mb-5">
+                <h2 className="text-3xl font-black text-green-900">
+                  {seccion.nombre}
+                </h2>
 
-              <div className="space-y-4">
+                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-bold">
+                  {seccion.partidos.length} partidos
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
                 {seccion.partidos.map((partido: any) => (
                   <div
                     key={partido.id}
-                    className="bg-gray-50 border rounded-xl p-4"
+                    className="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition"
                   >
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                      <div className="flex-1">
-                        <p className="text-xl font-bold text-gray-900">
-                          {partido.equipo_local} vs {partido.equipo_visitante}
-                        </p>
-
-                        <p className="text-sm text-gray-600 mt-1">
-                          {partido.estadio ? partido.estadio : ''}
-                          {partido.ciudad ? ` · ${partido.ciudad}` : ''}
-                        </p>
+                    <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-4">
+                      <div className="flex items-center gap-3">
+                        <span className="text-4xl">
+                          {bandera(partido.equipo_local)}
+                        </span>
+                        <span className="text-xl font-black text-gray-900">
+                          {partido.equipo_local}
+                        </span>
                       </div>
 
-                      <div className="flex items-center gap-3">
+                      <div className="flex justify-center items-center gap-3">
                         <input
                           type="number"
                           min="0"
-                          className="border p-2 w-16 rounded-lg text-center text-lg"
+                          className="border-2 border-green-700 p-2 w-16 rounded-xl text-center text-xl font-bold"
                           value={pronosticos[partido.id]?.local ?? 0}
                           onChange={(e) =>
                             setPronosticos({
@@ -249,12 +335,14 @@ export default function PronosticosPage() {
                           }
                         />
 
-                        <span className="font-bold text-xl">-</span>
+                        <span className="font-black text-2xl text-green-900">
+                          -
+                        </span>
 
                         <input
                           type="number"
                           min="0"
-                          className="border p-2 w-16 rounded-lg text-center text-lg"
+                          className="border-2 border-green-700 p-2 w-16 rounded-xl text-center text-xl font-bold"
                           value={pronosticos[partido.id]?.visitante ?? 0}
                           onChange={(e) =>
                             setPronosticos({
@@ -266,14 +354,30 @@ export default function PronosticosPage() {
                             })
                           }
                         />
-
-                        <button
-                          onClick={() => guardarPronostico(partido.id)}
-                          className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg"
-                        >
-                          Guardar
-                        </button>
                       </div>
+
+                      <div className="flex items-center justify-start md:justify-end gap-3">
+                        <span className="text-xl font-black text-gray-900">
+                          {partido.equipo_visitante}
+                        </span>
+                        <span className="text-4xl">
+                          {bandera(partido.equipo_visitante)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mt-4 border-t pt-3">
+                      <p className="text-sm text-gray-600">
+                        {partido.estadio ? partido.estadio : ''}
+                        {partido.ciudad ? ` · ${partido.ciudad}` : ''}
+                      </p>
+
+                      <button
+                        onClick={() => guardarPronostico(partido.id)}
+                        className="bg-green-700 hover:bg-green-800 text-white px-5 py-2 rounded-full font-bold shadow"
+                      >
+                        Guardar pronóstico
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -283,8 +387,8 @@ export default function PronosticosPage() {
         )}
       </div>
 
-      <div className="bg-white text-black max-w-5xl mx-auto rounded-2xl p-6 shadow-lg">
-        <h2 className="text-3xl font-bold mb-4 text-green-800">
+      <div className="bg-white/95 text-black max-w-6xl mx-auto rounded-3xl p-6 shadow-2xl border border-yellow-300">
+        <h2 className="text-3xl font-black mb-5 text-green-900">
           🏆 Ranking
         </h2>
 
@@ -294,12 +398,12 @@ export default function PronosticosPage() {
           ranking.map((usuario, index) => (
             <div
               key={usuario.id}
-              className="flex justify-between border-b py-3"
+              className="flex justify-between items-center border-b py-3"
             >
-              <span className="font-medium">
-                {index + 1}. {usuario.nombre}
+              <span className="font-bold text-lg">
+                {medalla(index)} {usuario.nombre}
               </span>
-              <span className="font-bold">
+              <span className="font-black text-green-800">
                 {usuario.totalPuntos} puntos
               </span>
             </div>
