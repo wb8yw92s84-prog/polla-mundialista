@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../lib/supabase'
+import { calcularTablasPorGrupo } from '../lib/simulador'
 
 export default function PronosticosPage() {
   const router = useRouter()
@@ -14,6 +15,8 @@ export default function PronosticosPage() {
   const [pronosticos, setPronosticos] = useState<any>({})
   const [vistaActiva, setVistaActiva] = useState('Grupos')
   const [grupoAbierto, setGrupoAbierto] = useState('Grupo A')
+
+  const tablasPorGrupo = calcularTablasPorGrupo(partidos, pronosticos)
 
   const banderas: any = {
     Ecuador: '🇪🇨',
@@ -250,6 +253,58 @@ export default function PronosticosPage() {
       .sort((a, b) => (a.numero_partido || 0) - (b.numero_partido || 0))
   }
 
+  function TablaGrupo({ grupo }: { grupo: string }) {
+    const tabla = tablasPorGrupo[grupo]
+
+    if (!tabla) return null
+
+    return (
+      <div className="mt-6 bg-green-950 text-white rounded-2xl p-4">
+        <h3 className="text-xl font-black mb-3">
+          Tabla proyectada - {grupo}
+        </h3>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-yellow-300 border-b border-green-700">
+                <th className="text-left py-2">Equipo</th>
+                <th>PJ</th>
+                <th>PG</th>
+                <th>PE</th>
+                <th>PP</th>
+                <th>GF</th>
+                <th>GC</th>
+                <th>DG</th>
+                <th>PTS</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {tabla.map((equipo: any, index: number) => (
+                <tr key={equipo.nombre} className="border-b border-green-800">
+                  <td className="py-2 font-bold">
+                    {index + 1}. {bandera(equipo.nombre)} {equipo.nombre}
+                  </td>
+                  <td className="text-center">{equipo.pj}</td>
+                  <td className="text-center">{equipo.pg}</td>
+                  <td className="text-center">{equipo.pe}</td>
+                  <td className="text-center">{equipo.pp}</td>
+                  <td className="text-center">{equipo.gf}</td>
+                  <td className="text-center">{equipo.gc}</td>
+                  <td className="text-center">{equipo.dg}</td>
+                  <td className="text-center font-black text-yellow-300">
+                    {equipo.pts}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
   function TarjetaPartido({ partido }: { partido: any }) {
     const cerrado = partidoBloqueado(partido.fecha)
 
@@ -443,6 +498,8 @@ export default function PronosticosPage() {
                   {grupo.partidos.map((partido: any) => (
                     <TarjetaPartido key={partido.id} partido={partido} />
                   ))}
+
+                  <TablaGrupo grupo={grupo.nombre} />
                 </div>
               )}
             </div>
