@@ -118,7 +118,6 @@ export default function PronosticosPage() {
       'Dieciseisavos de final',
       'Octavos de final',
       'Cuartos de final',
-      'Semi-finals',
       'Semifinales',
       'Tercer puesto',
       'Final',
@@ -127,10 +126,11 @@ export default function PronosticosPage() {
     const grupos: any = {}
 
     partidos.forEach((partido) => {
-      const nombreSeccion =
-        partido.grupo ||
-        partido.fase ||
-        'Otros partidos'
+      let nombreSeccion = partido.grupo || partido.fase || 'Otros partidos'
+
+      if (nombreSeccion === 'Semi-finals') {
+        nombreSeccion = 'Semifinales'
+      }
 
       if (!grupos[nombreSeccion]) grupos[nombreSeccion] = []
       grupos[nombreSeccion].push(partido)
@@ -169,111 +169,142 @@ export default function PronosticosPage() {
   }, [])
 
   return (
-    <main className="min-h-screen bg-green-900 text-white p-4 md:p-10">
-      <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <div>
-          <h1 className="text-3xl md:text-5xl font-bold">🏆 Polla Mundialista 2026</h1>
-          <p className="text-green-100 mt-2">Pronósticos por grupos y fases</p>
-        </div>
+    <main className="min-h-screen bg-green-900 text-white px-4 py-8">
+      <div className="max-w-5xl mx-auto mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl md:text-5xl font-bold">
+              🏆 Polla Mundialista 2026
+            </h1>
+            <p className="text-green-100 mt-2">
+              Pronósticos por grupos y fases
+            </p>
+          </div>
 
-        <button
-          onClick={cerrarSesion}
-          className="bg-red-600 text-white px-4 py-2 rounded-lg"
-        >
-          Salir
-        </button>
+          <button
+            onClick={cerrarSesion}
+            className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg"
+          >
+            Salir
+          </button>
+        </div>
       </div>
 
-      <div className="bg-white text-black max-w-5xl mx-auto rounded-xl p-6 mb-8 shadow">
-        <h2 className="text-2xl font-bold">Bienvenido, {usuarioNombre}</h2>
-        <p className="text-gray-700">Ingresa tus marcadores para cada partido y guarda tus pronósticos.</p>
+      <div className="bg-white text-black max-w-5xl mx-auto rounded-2xl p-6 mb-8 shadow-lg">
+        <h2 className="text-2xl font-bold">
+          Bienvenido, {usuarioNombre}
+        </h2>
+        <p className="text-gray-700 mt-1">
+          Ingresa tus marcadores y guarda tus pronósticos antes de cada partido.
+        </p>
       </div>
 
       <div className="max-w-5xl mx-auto mb-8">
         {partidos.length === 0 ? (
-          <div className="bg-white text-black rounded-xl p-6">
+          <div className="bg-white text-black rounded-2xl p-6">
             <p>No hay partidos registrados.</p>
           </div>
         ) : (
           obtenerSecciones().map((seccion) => (
-            <div key={seccion.nombre} className="bg-white text-black rounded-xl p-6 mb-8 shadow">
-              <h2 className="text-2xl font-bold mb-4 text-green-800">
+            <div
+              key={seccion.nombre}
+              className="bg-white text-black rounded-2xl p-6 mb-8 shadow-lg"
+            >
+              <h2 className="text-3xl font-bold mb-6 text-green-800 border-b pb-3">
                 {seccion.nombre}
               </h2>
 
-              {seccion.partidos.map((partido: any) => (
-                <div key={partido.id} className="border-b py-4">
-                  <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2 mb-3">
-                    <div>
-                      <p className="font-bold text-xl">
-  {partido.equipo_local} vs {partido.equipo_visitante}
-</p>
+              <div className="space-y-4">
+                {seccion.partidos.map((partido: any) => (
+                  <div
+                    key={partido.id}
+                    className="bg-gray-50 border rounded-xl p-4"
+                  >
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                      <div className="flex-1">
+                        <p className="text-xl font-bold text-gray-900">
+                          {partido.equipo_local} vs {partido.equipo_visitante}
+                        </p>
 
-                      <p className="text-sm text-gray-600">
-                        {partido.estadio ? partido.estadio : ''}
-                        {partido.ciudad ? ` - ${partido.ciudad}` : ''}
-                      </p>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {partido.estadio ? partido.estadio : ''}
+                          {partido.ciudad ? ` · ${partido.ciudad}` : ''}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="number"
+                          min="0"
+                          className="border p-2 w-16 rounded-lg text-center text-lg"
+                          value={pronosticos[partido.id]?.local ?? 0}
+                          onChange={(e) =>
+                            setPronosticos({
+                              ...pronosticos,
+                              [partido.id]: {
+                                ...pronosticos[partido.id],
+                                local: e.target.value,
+                              },
+                            })
+                          }
+                        />
+
+                        <span className="font-bold text-xl">-</span>
+
+                        <input
+                          type="number"
+                          min="0"
+                          className="border p-2 w-16 rounded-lg text-center text-lg"
+                          value={pronosticos[partido.id]?.visitante ?? 0}
+                          onChange={(e) =>
+                            setPronosticos({
+                              ...pronosticos,
+                              [partido.id]: {
+                                ...pronosticos[partido.id],
+                                visitante: e.target.value,
+                              },
+                            })
+                          }
+                        />
+
+                        <button
+                          onClick={() => guardarPronostico(partido.id)}
+                          className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg"
+                        >
+                          Guardar
+                        </button>
+                      </div>
                     </div>
                   </div>
-
-                  <div className="flex flex-wrap gap-3 items-center">
-                    <input
-                      type="number"
-                      min="0"
-                      className="border p-2 w-20 rounded"
-                      value={pronosticos[partido.id]?.local ?? 0}
-                      onChange={(e) =>
-                        setPronosticos({
-                          ...pronosticos,
-                          [partido.id]: {
-                            ...pronosticos[partido.id],
-                            local: e.target.value,
-                          },
-                        })
-                      }
-                    />
-
-                    <span className="font-bold">-</span>
-
-                    <input
-                      type="number"
-                      min="0"
-                      className="border p-2 w-20 rounded"
-                      value={pronosticos[partido.id]?.visitante ?? 0}
-                      onChange={(e) =>
-                        setPronosticos({
-                          ...pronosticos,
-                          [partido.id]: {
-                            ...pronosticos[partido.id],
-                            visitante: e.target.value,
-                          },
-                        })
-                      }
-                    />
-
-                    <button
-                      onClick={() => guardarPronostico(partido.id)}
-                      className="bg-green-700 text-white px-4 py-2 rounded-lg"
-                    >
-                      Guardar
-                    </button>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           ))
         )}
       </div>
 
-      <div className="bg-white text-black max-w-5xl mx-auto rounded-xl p-6 shadow">
-        <h2 className="text-2xl font-bold mb-4">🏆 Ranking</h2>
+      <div className="bg-white text-black max-w-5xl mx-auto rounded-2xl p-6 shadow-lg">
+        <h2 className="text-3xl font-bold mb-4 text-green-800">
+          🏆 Ranking
+        </h2>
 
-        {ranking.map((usuario, index) => (
-          <div key={usuario.id} className="flex justify-between border-b py-2">
-            <span>{index + 1}. {usuario.nombre}</span>
-            <span>{usuario.totalPuntos} puntos</span>
-          </div>
-        ))}
+        {ranking.length === 0 ? (
+          <p>No hay participantes aprobados todavía.</p>
+        ) : (
+          ranking.map((usuario, index) => (
+            <div
+              key={usuario.id}
+              className="flex justify-between border-b py-3"
+            >
+              <span className="font-medium">
+                {index + 1}. {usuario.nombre}
+              </span>
+              <span className="font-bold">
+                {usuario.totalPuntos} puntos
+              </span>
+            </div>
+          ))
+        )}
       </div>
     </main>
   )
