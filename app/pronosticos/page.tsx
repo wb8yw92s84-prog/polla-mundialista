@@ -66,11 +66,11 @@ export default function PronosticosPage() {
   function partidoBloqueado(fechaPartido: string | null) {
     if (!fechaPartido) return false
 
-    const ahora = new Date()
-    const fecha = new Date(fechaPartido)
-    const cierre = new Date(fecha.getTime() - 60 * 60 * 1000)
+    const fechaTexto = fechaPartido.replace(' ', 'T')
+    const fechaEcuador = new Date(`${fechaTexto}-05:00`)
+    const cierre = new Date(fechaEcuador.getTime() - 60 * 60 * 1000)
 
-    return ahora >= cierre
+    return new Date() >= cierre
   }
 
   async function cargarDatos(idUsuario: string) {
