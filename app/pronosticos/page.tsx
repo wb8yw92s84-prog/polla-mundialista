@@ -63,6 +63,16 @@ export default function PronosticosPage() {
     return banderas[nombre] || '🏳️'
   }
 
+  function partidoBloqueado(fechaPartido: string | null) {
+    if (!fechaPartido) return false
+
+    const ahora = new Date()
+    const fecha = new Date(fechaPartido)
+    const cierre = new Date(fecha.getTime() - 60 * 60 * 1000)
+
+    return ahora >= cierre
+  }
+
   async function cargarDatos(idUsuario: string) {
     const { data: partidosData } = await supabase
       .from('partidos')
@@ -112,6 +122,29 @@ export default function PronosticosPage() {
   }
 
   async function guardarPronostico(partidoId: string) {
+    if (!usuarioId) {
+      alert('Debes iniciar sesión')
+      router.push('/login')
+      return
+    }
+
+    const { data: partidoActual, error: errorPartido } = await supabase
+      .from('partidos')
+      .select('fecha')
+      .eq('id', partidoId)
+      .single()
+
+    if (errorPartido) {
+      alert('No se pudo verificar si el partido está cerrado.')
+      return
+    }
+
+    if (partidoActual?.fecha && partidoBloqueado(partidoActual.fecha)) {
+      alert('Este partido ya está cerrado para pronósticos.')
+      cargarDatos(usuarioId)
+      return
+    }
+
     const local = pronosticos[partidoId]?.local ?? 0
     const visitante = pronosticos[partidoId]?.visitante ?? 0
 
@@ -142,22 +175,60 @@ export default function PronosticosPage() {
   }
 
   function obtenerSecciones() {
+    const orden = [
+      'Grupo A',
+      'Grupo B',
+      'Grupo C',
+      'Grupo D',
+      'Grupo E',
+      'Grupo F',
+      'Grupo G',
+      'Grupo H',
+      'Grupo I',
+      'Grupo J',
+      'Grupo K',
+      'Grupo L',
+      'Grupo M',
+      'Grupo N',
+      'Grupo O',
+      'Grupo P',
+      'Dieciseisavos de final',
+      'Octavos de final',
+      'Cuartos de final',
+      'Semifinales',
+      'Tercer puesto',
+      'Final',
+    ]
+
     const grupos: any = {}
 
     partidos.forEach((partido) => {
       let nombreSeccion = partido.grupo || partido.fase || 'Otros partidos'
-      if (nombreSeccion === 'Semi-finals') nombreSeccion = 'Semifinales'
+
+      if (nombreSeccion === 'Semi-finals') {
+        nombreSeccion = 'Semifinales'
+      }
 
       if (!grupos[nombreSeccion]) grupos[nombreSeccion] = []
       grupos[nombreSeccion].push(partido)
     })
 
-    return Object.keys(grupos).map((nombre) => ({
-      nombre,
-      partidos: grupos[nombre].sort(
-        (a: any, b: any) => (a.numero_partido || 0) - (b.numero_partido || 0)
-      ),
-    }))
+    return Object.keys(grupos)
+      .sort((a, b) => {
+        const ia = orden.indexOf(a)
+        const ib = orden.indexOf(b)
+
+        if (ia === -1 && ib === -1) return a.localeCompare(b)
+        if (ia === -1) return 1
+        if (ib === -1) return -1
+        return ia - ib
+      })
+      .map((nombre) => ({
+        nombre,
+        partidos: grupos[nombre].sort(
+          (a: any, b: any) => (a.numero_partido || 0) - (b.numero_partido || 0)
+        ),
+      }))
   }
 
   function medalla(index: number) {
@@ -184,133 +255,192 @@ export default function PronosticosPage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-950 via-green-950 to-emerald-900 text-white px-4 py-8">
       <div className="max-w-6xl mx-auto mb-8">
-        <p className="uppercase tracking-[0.3em] text-yellow-400 text-sm font-bold">
-          Mundial 2026
-        </p>
-        <h1 className="text-4xl md:text-6xl font-black mt-2">
-          🏆 Polla Mundialista
-        </h1>
-        <p className="text-green-100 mt-3 text-lg">
-          Pronósticos por grupos, fases y ranking en vivo.
-        </p>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <p className="uppercase tracking-[0.3em] text-yellow-400 text-sm font-bold">
+              Mundial 2026
+            </p>
+            <h1 className="text-4xl md:text-6xl font-black mt-2">
+              🏆 Polla Mundialista
+            </h1>
+            <p className="text-green-100 mt-3 text-lg">
+              Pronósticos por grupos, fases y ranking en vivo.
+            </p>
+          </div>
 
-        <button
-          onClick={cerrarSesion}
-          className="mt-4 bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-full font-bold shadow"
-        >
-          Salir
-        </button>
+          <button
+            onClick={cerrarSesion}
+            className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-full font-bold shadow"
+          >
+            Salir
+          </button>
+        </div>
       </div>
 
       <div className="bg-white/95 text-black max-w-6xl mx-auto rounded-3xl p-6 mb-8 shadow-2xl border border-yellow-300">
-        <h2 className="text-2xl font-black">Bienvenido, {usuarioNombre}</h2>
+        <h2 className="text-2xl font-black">
+          Bienvenido, {usuarioNombre}
+        </h2>
         <p className="text-gray-700 mt-1">
           Ingresa tus marcadores y guarda tus pronósticos antes de cada partido.
         </p>
       </div>
 
       <div className="max-w-6xl mx-auto mb-8">
-        {obtenerSecciones().map((seccion) => (
-          <div
-            key={seccion.nombre}
-            className="bg-white/95 text-black rounded-3xl p-5 md:p-7 mb-8 shadow-2xl"
-          >
-            <h2 className="text-3xl font-black mb-6 text-green-900 border-b pb-4">
-              {seccion.nombre}
-            </h2>
-
-            <div className="grid grid-cols-1 gap-4">
-              {seccion.partidos.map((partido: any) => (
-                <div
-                  key={partido.id}
-                  className="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-2xl p-4 shadow-sm"
-                >
-
-                  <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-4">
-                    <div className="flex items-center gap-3">
-                      <span className="text-4xl">{bandera(partido.equipo_local)}</span>
-                      <span className="text-xl font-black text-gray-900">
-                        {partido.equipo_local}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-center items-center gap-3">
-                      <input
-                        type="number"
-                        min="0"
-                        className="border-2 border-green-700 p-2 w-16 rounded-xl text-center text-xl font-bold"
-                        value={pronosticos[partido.id]?.local ?? 0}
-                        onChange={(e) =>
-                          setPronosticos({
-                            ...pronosticos,
-                            [partido.id]: {
-                              ...pronosticos[partido.id],
-                              local: e.target.value,
-                            },
-                          })
-                        }
-                      />
-
-                      <span className="font-black text-2xl text-green-900">-</span>
-
-                      <input
-                        type="number"
-                        min="0"
-                        className="border-2 border-green-700 p-2 w-16 rounded-xl text-center text-xl font-bold"
-                        value={pronosticos[partido.id]?.visitante ?? 0}
-                        onChange={(e) =>
-                          setPronosticos({
-                            ...pronosticos,
-                            [partido.id]: {
-                              ...pronosticos[partido.id],
-                              visitante: e.target.value,
-                            },
-                          })
-                        }
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-start md:justify-end gap-3">
-                      <span className="text-xl font-black text-gray-900">
-                        {partido.equipo_visitante}
-                      </span>
-                      <span className="text-4xl">{bandera(partido.equipo_visitante)}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mt-4 border-t pt-3">
-                    <p className="text-sm text-gray-600">
-                      {partido.estadio || ''}
-                      {partido.ciudad ? ` · ${partido.ciudad}` : ''}
-                    </p>
-
-                    <button
-                      onClick={() => guardarPronostico(partido.id)}
-                      className="bg-green-700 hover:bg-green-800 text-white px-5 py-2 rounded-full font-bold shadow"
-                    >
-                      Guardar pronóstico
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+        {partidos.length === 0 ? (
+          <div className="bg-white text-black rounded-3xl p-6">
+            <p>No hay partidos registrados.</p>
           </div>
-        ))}
+        ) : (
+          obtenerSecciones().map((seccion) => (
+            <div
+              key={seccion.nombre}
+              className="bg-white/95 text-black rounded-3xl p-5 md:p-7 mb-8 shadow-2xl border border-white"
+            >
+              <div className="flex items-center justify-between border-b pb-4 mb-5">
+                <h2 className="text-3xl font-black text-green-900">
+                  {seccion.nombre}
+                </h2>
+
+                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-bold">
+                  {seccion.partidos.length} partidos
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
+                {seccion.partidos.map((partido: any) => {
+                  const cerrado = partidoBloqueado(partido.fecha)
+
+                  return (
+                    <div
+                      key={partido.id}
+                      className="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition"
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-4">
+                        <div className="flex items-center gap-3">
+                          <span className="text-4xl">
+                            {bandera(partido.equipo_local)}
+                          </span>
+                          <span className="text-xl font-black text-gray-900">
+                            {partido.equipo_local}
+                          </span>
+                        </div>
+
+                        <div className="flex justify-center items-center gap-3">
+                          <input
+                            type="number"
+                            min="0"
+                            disabled={cerrado}
+                            className={`border-2 p-2 w-16 rounded-xl text-center text-xl font-bold ${
+                              cerrado
+                                ? 'border-gray-300 bg-gray-200 text-gray-500 cursor-not-allowed'
+                                : 'border-green-700 bg-white text-black'
+                            }`}
+                            value={pronosticos[partido.id]?.local ?? 0}
+                            onChange={(e) =>
+                              setPronosticos({
+                                ...pronosticos,
+                                [partido.id]: {
+                                  ...pronosticos[partido.id],
+                                  local: e.target.value,
+                                },
+                              })
+                            }
+                          />
+
+                          <span className="font-black text-2xl text-green-900">
+                            -
+                          </span>
+
+                          <input
+                            type="number"
+                            min="0"
+                            disabled={cerrado}
+                            className={`border-2 p-2 w-16 rounded-xl text-center text-xl font-bold ${
+                              cerrado
+                                ? 'border-gray-300 bg-gray-200 text-gray-500 cursor-not-allowed'
+                                : 'border-green-700 bg-white text-black'
+                            }`}
+                            value={pronosticos[partido.id]?.visitante ?? 0}
+                            onChange={(e) =>
+                              setPronosticos({
+                                ...pronosticos,
+                                [partido.id]: {
+                                  ...pronosticos[partido.id],
+                                  visitante: e.target.value,
+                                },
+                              })
+                            }
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-start md:justify-end gap-3">
+                          <span className="text-xl font-black text-gray-900">
+                            {partido.equipo_visitante}
+                          </span>
+                          <span className="text-4xl">
+                            {bandera(partido.equipo_visitante)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mt-4 border-t pt-3">
+                        <p className="text-sm text-gray-600">
+                          {partido.estadio ? partido.estadio : ''}
+                          {partido.ciudad ? ` · ${partido.ciudad}` : ''}
+                        </p>
+
+                        <div className="flex items-center gap-3">
+                          {cerrado && (
+                            <span className="text-red-600 font-bold">
+                              🔒 Pronóstico cerrado
+                            </span>
+                          )}
+
+                          <button
+                            onClick={() => guardarPronostico(partido.id)}
+                            disabled={cerrado}
+                            className={`px-5 py-2 rounded-full font-bold shadow text-white ${
+                              cerrado
+                                ? 'bg-gray-400 cursor-not-allowed'
+                                : 'bg-green-700 hover:bg-green-800'
+                            }`}
+                          >
+                            Guardar pronóstico
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       <div className="bg-white/95 text-black max-w-6xl mx-auto rounded-3xl p-6 shadow-2xl border border-yellow-300">
-        <h2 className="text-3xl font-black mb-5 text-green-900">🏆 Ranking</h2>
+        <h2 className="text-3xl font-black mb-5 text-green-900">
+          🏆 Ranking
+        </h2>
 
-        {ranking.map((usuario, index) => (
-          <div key={usuario.id} className="flex justify-between items-center border-b py-3">
-            <span className="font-bold text-lg">
-              {medalla(index)} {usuario.nombre}
-            </span>
-            <span className="font-black text-green-800">
-              {usuario.totalPuntos} puntos
-            </span>
-          </div>
-        ))}
+        {ranking.length === 0 ? (
+          <p>No hay participantes aprobados todavía.</p>
+        ) : (
+          ranking.map((usuario, index) => (
+            <div
+              key={usuario.id}
+              className="flex justify-between items-center border-b py-3"
+            >
+              <span className="font-bold text-lg">
+                {medalla(index)} {usuario.nombre}
+              </span>
+              <span className="font-black text-green-800">
+                {usuario.totalPuntos} puntos
+              </span>
+            </div>
+          ))
+        )}
       </div>
     </main>
   )
