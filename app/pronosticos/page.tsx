@@ -205,9 +205,9 @@ export default function PronosticosPage() {
                 <div key={partido.id} className="border-b py-4">
                   <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2 mb-3">
                     <div>
-                      <p className="font-bold text-lg">
-                        Partido {partido.numero_partido}: {partido.equipo_local} vs {partido.equipo_visitante}
-                      </p>
+                      <p className="font-bold text-xl">
+  {partido.equipo_local} vs {partido.equipo_visitante}
+</p>
 
                       <p className="text-sm text-gray-600">
                         {partido.estadio ? partido.estadio : ''}
