@@ -63,19 +63,6 @@ export default function PronosticosPage() {
     return banderas[nombre] || '🏳️'
   }
 
-  function formatearFecha(fecha: string | null) {
-    if (!fecha) return 'Fecha y hora por confirmar'
-
-    return new Date(fecha).toLocaleString('es-EC', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
-
   async function cargarDatos(idUsuario: string) {
     const { data: partidosData } = await supabase
       .from('partidos')
@@ -238,9 +225,6 @@ export default function PronosticosPage() {
                   key={partido.id}
                   className="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-2xl p-4 shadow-sm"
                 >
-                  <p className="text-sm font-bold text-yellow-700 mb-3">
-                    📅 {formatearFecha(partido.fecha)}
-                  </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-4">
                     <div className="flex items-center gap-3">
