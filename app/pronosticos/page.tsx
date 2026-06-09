@@ -12,6 +12,8 @@ export default function PronosticosPage() {
   const [partidos, setPartidos] = useState<any[]>([])
   const [ranking, setRanking] = useState<any[]>([])
   const [pronosticos, setPronosticos] = useState<any>({})
+  const [vistaActiva, setVistaActiva] = useState('Grupos')
+  const [grupoAbierto, setGrupoAbierto] = useState('Grupo A')
 
   const banderas: any = {
     Ecuador: '🇪🇨',
@@ -174,7 +176,38 @@ export default function PronosticosPage() {
     router.push('/login')
   }
 
-  function obtenerSecciones() {
+  function medalla(index: number) {
+    if (index === 0) return '🥇'
+    if (index === 1) return '🥈'
+    if (index === 2) return '🥉'
+    return `${index + 1}.`
+  }
+
+  function normalizarFase(partido: any) {
+    const texto = `${partido.grupo || ''} ${partido.fase || ''}`.toLowerCase()
+
+    if (texto.includes('grupo')) return 'Grupos'
+    if (texto.includes('dieciseisavos')) return '16avos'
+    if (texto.includes('octavos')) return '8vos'
+    if (texto.includes('cuartos')) return 'Cuartos'
+    if (texto.includes('semi')) return 'Semifinales'
+    if (texto.includes('tercer')) return 'Final'
+    if (texto.includes('final')) return 'Final'
+
+    return 'Grupos'
+  }
+
+  function obtenerGrupos() {
+    const grupos: any = {}
+
+    partidos
+      .filter((p) => normalizarFase(p) === 'Grupos')
+      .forEach((partido) => {
+        const nombre = partido.grupo || 'Sin grupo'
+        if (!grupos[nombre]) grupos[nombre] = []
+        grupos[nombre].push(partido)
+      })
+
     const orden = [
       'Grupo A',
       'Grupo B',
@@ -192,37 +225,10 @@ export default function PronosticosPage() {
       'Grupo N',
       'Grupo O',
       'Grupo P',
-      'Dieciseisavos de final',
-      'Octavos de final',
-      'Cuartos de final',
-      'Semifinales',
-      'Tercer puesto',
-      'Final',
     ]
 
-    const grupos: any = {}
-
-    partidos.forEach((partido) => {
-      let nombreSeccion = partido.grupo || partido.fase || 'Otros partidos'
-
-      if (nombreSeccion === 'Semi-finals') {
-        nombreSeccion = 'Semifinales'
-      }
-
-      if (!grupos[nombreSeccion]) grupos[nombreSeccion] = []
-      grupos[nombreSeccion].push(partido)
-    })
-
     return Object.keys(grupos)
-      .sort((a, b) => {
-        const ia = orden.indexOf(a)
-        const ib = orden.indexOf(b)
-
-        if (ia === -1 && ib === -1) return a.localeCompare(b)
-        if (ia === -1) return 1
-        if (ib === -1) return -1
-        return ia - ib
-      })
+      .sort((a, b) => orden.indexOf(a) - orden.indexOf(b))
       .map((nombre) => ({
         nombre,
         partidos: grupos[nombre].sort(
@@ -231,11 +237,107 @@ export default function PronosticosPage() {
       }))
   }
 
-  function medalla(index: number) {
-    if (index === 0) return '🥇'
-    if (index === 1) return '🥈'
-    if (index === 2) return '🥉'
-    return `${index + 1}.`
+  function obtenerPartidosPorVista() {
+    return partidos
+      .filter((p) => normalizarFase(p) === vistaActiva)
+      .sort((a, b) => (a.numero_partido || 0) - (b.numero_partido || 0))
+  }
+
+  function TarjetaPartido({ partido }: { partido: any }) {
+    const cerrado = partidoBloqueado(partido.fecha)
+
+    return (
+      <div className="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-4">
+          <div className="flex items-center gap-3">
+            <span className="text-4xl">{bandera(partido.equipo_local)}</span>
+            <span className="text-xl font-black text-gray-900">
+              {partido.equipo_local}
+            </span>
+          </div>
+
+          <div className="flex justify-center items-center gap-3">
+            <input
+              type="number"
+              min="0"
+              disabled={cerrado}
+              className={`border-2 p-2 w-16 rounded-xl text-center text-xl font-bold ${
+                cerrado
+                  ? 'border-gray-300 bg-gray-200 text-gray-500 cursor-not-allowed'
+                  : 'border-green-700 bg-white text-black'
+              }`}
+              value={pronosticos[partido.id]?.local ?? 0}
+              onChange={(e) =>
+                setPronosticos({
+                  ...pronosticos,
+                  [partido.id]: {
+                    ...pronosticos[partido.id],
+                    local: e.target.value,
+                  },
+                })
+              }
+            />
+
+            <span className="font-black text-2xl text-green-900">-</span>
+
+            <input
+              type="number"
+              min="0"
+              disabled={cerrado}
+              className={`border-2 p-2 w-16 rounded-xl text-center text-xl font-bold ${
+                cerrado
+                  ? 'border-gray-300 bg-gray-200 text-gray-500 cursor-not-allowed'
+                  : 'border-green-700 bg-white text-black'
+              }`}
+              value={pronosticos[partido.id]?.visitante ?? 0}
+              onChange={(e) =>
+                setPronosticos({
+                  ...pronosticos,
+                  [partido.id]: {
+                    ...pronosticos[partido.id],
+                    visitante: e.target.value,
+                  },
+                })
+              }
+            />
+          </div>
+
+          <div className="flex items-center justify-start md:justify-end gap-3">
+            <span className="text-xl font-black text-gray-900">
+              {partido.equipo_visitante}
+            </span>
+            <span className="text-4xl">{bandera(partido.equipo_visitante)}</span>
+          </div>
+        </div>
+
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mt-4 border-t pt-3">
+          <p className="text-sm text-gray-600">
+            {partido.estadio ? partido.estadio : ''}
+            {partido.ciudad ? ` · ${partido.ciudad}` : ''}
+          </p>
+
+          <div className="flex items-center gap-3">
+            {cerrado && (
+              <span className="text-red-600 font-bold">
+                🔒 Pronóstico cerrado
+              </span>
+            )}
+
+            <button
+              onClick={() => guardarPronostico(partido.id)}
+              disabled={cerrado}
+              className={`px-5 py-2 rounded-full font-bold shadow text-white ${
+                cerrado
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-green-700 hover:bg-green-800'
+              }`}
+            >
+              Guardar pronóstico
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   useEffect(() => {
@@ -251,6 +353,8 @@ export default function PronosticosPage() {
     setUsuarioNombre(nombre || '')
     cargarDatos(id)
   }, [])
+
+  const vistas = ['Grupos', '16avos', '8vos', 'Cuartos', 'Semifinales', 'Final']
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-950 via-green-950 to-emerald-900 text-white px-4 py-8">
@@ -278,12 +382,26 @@ export default function PronosticosPage() {
       </div>
 
       <div className="bg-white/95 text-black max-w-6xl mx-auto rounded-3xl p-6 mb-8 shadow-2xl border border-yellow-300">
-        <h2 className="text-2xl font-black">
-          Bienvenido, {usuarioNombre}
-        </h2>
+        <h2 className="text-2xl font-black">Bienvenido, {usuarioNombre}</h2>
         <p className="text-gray-700 mt-1">
           Ingresa tus marcadores y guarda tus pronósticos antes de cada partido.
         </p>
+      </div>
+
+      <div className="max-w-6xl mx-auto mb-8 flex flex-wrap gap-3">
+        {vistas.map((vista) => (
+          <button
+            key={vista}
+            onClick={() => setVistaActiva(vista)}
+            className={`px-5 py-2 rounded-full font-bold shadow ${
+              vistaActiva === vista
+                ? 'bg-yellow-400 text-green-950'
+                : 'bg-white/90 text-green-900 hover:bg-yellow-100'
+            }`}
+          >
+            {vista}
+          </button>
+        ))}
       </div>
 
       <div className="max-w-6xl mx-auto mb-8">
@@ -291,131 +409,55 @@ export default function PronosticosPage() {
           <div className="bg-white text-black rounded-3xl p-6">
             <p>No hay partidos registrados.</p>
           </div>
-        ) : (
-          obtenerSecciones().map((seccion) => (
+        ) : vistaActiva === 'Grupos' ? (
+          obtenerGrupos().map((grupo) => (
             <div
-              key={seccion.nombre}
-              className="bg-white/95 text-black rounded-3xl p-5 md:p-7 mb-8 shadow-2xl border border-white"
+              key={grupo.nombre}
+              className="bg-white/95 text-black rounded-3xl mb-5 shadow-2xl overflow-hidden"
             >
-              <div className="flex items-center justify-between border-b pb-4 mb-5">
-                <h2 className="text-3xl font-black text-green-900">
-                  {seccion.nombre}
-                </h2>
+              <button
+                onClick={() =>
+                  setGrupoAbierto(grupoAbierto === grupo.nombre ? '' : grupo.nombre)
+                }
+                className="w-full flex justify-between items-center p-5 text-left"
+              >
+                <span className="text-3xl font-black text-green-900">
+                  {grupo.nombre}
+                </span>
 
                 <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-bold">
-                  {seccion.partidos.length} partidos
+                  {grupoAbierto === grupo.nombre ? 'Cerrar' : 'Abrir'} ·{' '}
+                  {grupo.partidos.length} partidos
                 </span>
-              </div>
+              </button>
 
-              <div className="grid grid-cols-1 gap-4">
-                {seccion.partidos.map((partido: any) => {
-                  const cerrado = partidoBloqueado(partido.fecha)
-
-                  return (
-                    <div
-                      key={partido.id}
-                      className="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition"
-                    >
-                      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-4">
-                        <div className="flex items-center gap-3">
-                          <span className="text-4xl">
-                            {bandera(partido.equipo_local)}
-                          </span>
-                          <span className="text-xl font-black text-gray-900">
-                            {partido.equipo_local}
-                          </span>
-                        </div>
-
-                        <div className="flex justify-center items-center gap-3">
-                          <input
-                            type="number"
-                            min="0"
-                            disabled={cerrado}
-                            className={`border-2 p-2 w-16 rounded-xl text-center text-xl font-bold ${
-                              cerrado
-                                ? 'border-gray-300 bg-gray-200 text-gray-500 cursor-not-allowed'
-                                : 'border-green-700 bg-white text-black'
-                            }`}
-                            value={pronosticos[partido.id]?.local ?? 0}
-                            onChange={(e) =>
-                              setPronosticos({
-                                ...pronosticos,
-                                [partido.id]: {
-                                  ...pronosticos[partido.id],
-                                  local: e.target.value,
-                                },
-                              })
-                            }
-                          />
-
-                          <span className="font-black text-2xl text-green-900">
-                            -
-                          </span>
-
-                          <input
-                            type="number"
-                            min="0"
-                            disabled={cerrado}
-                            className={`border-2 p-2 w-16 rounded-xl text-center text-xl font-bold ${
-                              cerrado
-                                ? 'border-gray-300 bg-gray-200 text-gray-500 cursor-not-allowed'
-                                : 'border-green-700 bg-white text-black'
-                            }`}
-                            value={pronosticos[partido.id]?.visitante ?? 0}
-                            onChange={(e) =>
-                              setPronosticos({
-                                ...pronosticos,
-                                [partido.id]: {
-                                  ...pronosticos[partido.id],
-                                  visitante: e.target.value,
-                                },
-                              })
-                            }
-                          />
-                        </div>
-
-                        <div className="flex items-center justify-start md:justify-end gap-3">
-                          <span className="text-xl font-black text-gray-900">
-                            {partido.equipo_visitante}
-                          </span>
-                          <span className="text-4xl">
-                            {bandera(partido.equipo_visitante)}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mt-4 border-t pt-3">
-                        <p className="text-sm text-gray-600">
-                          {partido.estadio ? partido.estadio : ''}
-                          {partido.ciudad ? ` · ${partido.ciudad}` : ''}
-                        </p>
-
-                        <div className="flex items-center gap-3">
-                          {cerrado && (
-                            <span className="text-red-600 font-bold">
-                              🔒 Pronóstico cerrado
-                            </span>
-                          )}
-
-                          <button
-                            onClick={() => guardarPronostico(partido.id)}
-                            disabled={cerrado}
-                            className={`px-5 py-2 rounded-full font-bold shadow text-white ${
-                              cerrado
-                                ? 'bg-gray-400 cursor-not-allowed'
-                                : 'bg-green-700 hover:bg-green-800'
-                            }`}
-                          >
-                            Guardar pronóstico
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
+              {grupoAbierto === grupo.nombre && (
+                <div className="p-5 border-t grid grid-cols-1 gap-4">
+                  {grupo.partidos.map((partido: any) => (
+                    <TarjetaPartido key={partido.id} partido={partido} />
+                  ))}
+                </div>
+              )}
             </div>
           ))
+        ) : (
+          <div className="bg-white/95 text-black rounded-3xl p-5 md:p-7 shadow-2xl">
+            <div className="flex items-center justify-between border-b pb-4 mb-5">
+              <h2 className="text-3xl font-black text-green-900">
+                {vistaActiva}
+              </h2>
+
+              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-bold">
+                {obtenerPartidosPorVista().length} partidos
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              {obtenerPartidosPorVista().map((partido: any) => (
+                <TarjetaPartido key={partido.id} partido={partido} />
+              ))}
+            </div>
+          </div>
         )}
       </div>
 
