@@ -1,26 +1,18 @@
 import { NextResponse } from 'next/server'
 
 export async function GET() {
-  const token = process.env.SPORTMONKS_API_TOKEN
-
-  if (!token) {
-    return NextResponse.json({ error: 'Falta SPORTMONKS_API_TOKEN' })
-  }
+  const apiKey = process.env.API_FOOTBALL_KEY
 
   const response = await fetch(
-    `https://api.sportmonks.com/v3/football/leagues?api_token=${token}&per_page=100`
+    'https://v3.football.api-sports.io/leagues',
+    {
+      headers: {
+        'x-apisports-key': apiKey || ''
+      }
+    }
   )
 
   const data = await response.json()
 
-  const ligas = data.data || []
-
-  const posibles = ligas.filter((liga: any) =>
-    String(liga.name).toLowerCase().includes('world')
-  )
-
-  return NextResponse.json({
-    total_recibidas: ligas.length,
-    posibles_mundial: posibles,
-  })
+  return NextResponse.json(data)
 }
