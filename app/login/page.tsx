@@ -85,6 +85,15 @@ export default function Login() {
           CREAR CUENTA
         </button>
       </div>
+
+      <a
+        href="https://wa.me/593987404664?text=Hola,%20estoy%20interesado%20en%20participar%20en%20la%20Polla%20Mundialista%202026."
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-5 right-5 z-50 bg-green-500 hover:bg-green-600 text-white px-5 py-4 rounded-full shadow-2xl font-bold"
+      >
+        💬 WhatsApp
+      </a>
     </main>
   )
 }
