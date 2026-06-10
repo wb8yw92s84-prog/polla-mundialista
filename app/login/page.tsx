@@ -34,11 +34,14 @@ export default function Login() {
   }
 
   return (
-    <main
-      className="min-h-screen bg-cover bg-center flex items-center justify-center p-6"
-      style={{ backgroundImage: "url('/login-mundial-2026.png')" }}
-    >
-      <div className="absolute inset-0 bg-black/35" />
+    <main className="relative min-h-screen flex items-center justify-center p-6 overflow-hidden">
+  <img
+    src="/login-mundial-2026.png"
+    alt="Fondo Mundial 2026"
+    className="absolute inset-0 w-full h-full object-cover"
+  />
+
+  <div className="absolute inset-0 bg-black/25" />
 
       <div className="relative bg-black/65 backdrop-blur-md text-white rounded-3xl shadow-2xl p-8 max-w-md w-full border border-yellow-400">
         <h1 className="text-3xl font-black text-center mb-2">
