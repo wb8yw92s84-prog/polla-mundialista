@@ -11,13 +11,20 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('')
 
   async function iniciarSesion() {
+    const correo = email.trim().toLowerCase()
+
+    if (correo !== 'jxav_91@hotmail.com') {
+      alert('No tienes permisos para acceder como administrador.')
+      return
+    }
+
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: correo,
       password,
     })
 
     if (error) {
-      alert('Error: ' + error.message)
+      alert('Correo o contraseña de administrador incorrectos.')
       return
     }
 
@@ -25,18 +32,22 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-slate-900 p-8 rounded-3xl shadow-2xl border border-yellow-500">
-        <h1 className="w-full border border-gray-600 bg-slate-800 text-white p-4 rounded-xl">
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 p-4">
+      <div className="w-full max-w-md bg-slate-900 p-8 rounded-3xl shadow-2xl border border-yellow-500">
+        <h1 className="text-3xl font-black text-white text-center mb-2">
           Login Administrador
         </h1>
 
+        <p className="text-yellow-400 text-center mb-6 font-bold">
+          Panel privado de la Polla Mundialista
+        </p>
+
         <input
           type="email"
-          placeholder="Correo"
+          placeholder="Correo administrador"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="border p-3 w-full mb-4"
+          className="border border-gray-600 bg-slate-800 text-white placeholder-gray-400 p-4 w-full mb-4 rounded-xl outline-none focus:border-yellow-400"
         />
 
         <input
@@ -44,14 +55,21 @@ export default function AdminLoginPage() {
           placeholder="Contraseña"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="border p-3 w-full mb-4"
+          className="border border-gray-600 bg-slate-800 text-white placeholder-gray-400 p-4 w-full mb-6 rounded-xl outline-none focus:border-yellow-400"
         />
 
         <button
           onClick={iniciarSesion}
-          className="bg-blue-700 text-white px-5 py-3 rounded-lg w-full"
+          className="bg-blue-700 hover:bg-blue-800 text-white px-5 py-4 rounded-xl w-full font-bold"
         >
           Iniciar sesión
+        </button>
+
+        <button
+          onClick={() => router.push('/login')}
+          className="mt-4 text-gray-300 w-full text-sm"
+        >
+          Volver al login de participantes
         </button>
       </div>
     </main>
