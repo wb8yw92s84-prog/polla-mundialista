@@ -24,7 +24,7 @@ export default function Login() {
     }
 
     if (!data.aprobado) {
-      alert('Tu cuenta aún no ha sido aprobada.')
+      alert('Tu cuenta aún no ha sido aprobada. Se activará cuando se confirme el pago.')
       return
     }
 
@@ -35,23 +35,21 @@ export default function Login() {
   }
 
   return (
-    <main className="relative min-h-screen flex items-center justify-center overflow-hidden">
-
+    <main className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black p-4">
       <img
         src="/login-mundial-2026-v2.png"
         alt="Mundial 2026"
-        className="absolute inset-0 w-full h-full object-cover"
+        className="pointer-events-none absolute inset-0 w-full h-full object-cover"
       />
 
-      <div className="absolute inset-0 bg-black/50" />
+      <div className="pointer-events-none absolute inset-0 bg-black/45" />
 
-      <div className="relative z-10 w-full max-w-md bg-black/70 backdrop-blur-md rounded-3xl border border-yellow-400 p-8 shadow-2xl">
-
-        <h1 className="text-white text-4xl font-black text-center mb-2">
+      <div className="relative z-20 w-full max-w-md bg-black/75 backdrop-blur-md rounded-3xl border border-yellow-400 p-6 md:p-8 shadow-2xl text-white">
+        <h1 className="text-3xl md:text-4xl font-black text-center mb-2">
           Polla Mundialista
         </h1>
 
-        <p className="text-center text-yellow-300 mb-8 font-semibold">
+        <p className="text-center text-yellow-300 mb-6 font-semibold">
           FIFA World Cup 2026
         </p>
 
@@ -60,7 +58,7 @@ export default function Login() {
           placeholder="Correo electrónico"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-4 rounded-xl bg-black/60 border border-gray-500 text-white mb-4"
+          className="w-full p-4 rounded-xl bg-black/70 border border-gray-500 text-white placeholder-gray-300 mb-4 outline-none focus:border-yellow-400"
         />
 
         <input
@@ -68,23 +66,24 @@ export default function Login() {
           placeholder="Contraseña"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-4 rounded-xl bg-black/60 border border-gray-500 text-white mb-6"
+          className="w-full p-4 rounded-xl bg-black/70 border border-gray-500 text-white placeholder-gray-300 mb-6 outline-none focus:border-yellow-400"
         />
 
         <button
+          type="button"
           onClick={iniciarSesion}
-          className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-bold text-lg"
+          className="relative z-30 w-full bg-green-600 hover:bg-green-700 active:bg-green-800 text-white py-4 rounded-xl font-bold text-lg"
         >
           INGRESAR
         </button>
 
         <button
+          type="button"
           onClick={() => router.push('/registro')}
-          className="w-full mt-4 bg-yellow-400 hover:bg-yellow-500 text-black py-4 rounded-xl font-bold"
+          className="relative z-30 w-full mt-4 bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 text-black py-4 rounded-xl font-bold"
         >
           CREAR CUENTA
         </button>
-
       </div>
     </main>
   )
