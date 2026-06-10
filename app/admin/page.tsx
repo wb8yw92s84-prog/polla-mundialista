@@ -12,6 +12,10 @@ export default function AdminPage() {
   const [resultados, setResultados] = useState<any>({})
   const [cargando, setCargando] = useState(true)
 
+  const [totalAprobados, setTotalAprobados] = useState(0)
+  const [totalPronosticos, setTotalPronosticos] = useState(0)
+  const [totalResultados, setTotalResultados] = useState(0)
+
   async function verificarSesion() {
     try {
       const { data } = await supabase.auth.getSession()
@@ -34,6 +38,7 @@ export default function AdminPage() {
 
       await cargarPartidos()
       await cargarUsuariosPendientes()
+      await cargarEstadisticas()
       setCargando(false)
     } catch (error) {
       console.error(error)
@@ -46,6 +51,25 @@ export default function AdminPage() {
   async function cerrarSesion() {
     await supabase.auth.signOut()
     router.push('/adminlogin')
+  }
+
+  async function cargarEstadisticas() {
+    const { data: aprobados } = await supabase
+      .from('usuarios')
+      .select('*')
+      .eq('aprobado', true)
+
+    const { data: pronosticosData } = await supabase
+      .from('pronosticos')
+      .select('*')
+
+    const { data: resultadosData } = await supabase
+      .from('resultados_oficiales')
+      .select('*')
+
+    setTotalAprobados((aprobados || []).length)
+    setTotalPronosticos((pronosticosData || []).length)
+    setTotalResultados((resultadosData || []).length)
   }
 
   async function cargarPartidos() {
@@ -78,7 +102,8 @@ export default function AdminPage() {
     }
 
     alert('Participante aprobado correctamente')
-    cargarUsuariosPendientes()
+    await cargarUsuariosPendientes()
+    await cargarEstadisticas()
   }
 
   function calcularPuntos(
@@ -166,6 +191,7 @@ export default function AdminPage() {
 
     alert('Resultado guardado y puntos actualizados')
     await cargarPartidos()
+    await cargarEstadisticas()
   }
 
   useEffect(() => {
@@ -189,20 +215,66 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-900 text-white p-6 md:p-10">
-      <div className="max-w-4xl mx-auto flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold">Panel Admin</h1>
+    <main className="min-h-screen bg-slate-900 text-white p-4 md:p-10">
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between md:items-center gap-4 mb-8">
+        <div>
+          <p className="text-yellow-400 font-bold uppercase tracking-[0.25em] text-sm">
+            Mundial 2026
+          </p>
+          <h1 className="text-4xl md:text-5xl font-black">
+            Panel Admin
+          </h1>
+        </div>
 
         <button
           onClick={cerrarSesion}
-          className="bg-red-600 text-white px-4 py-2 rounded-lg"
+          className="bg-red-600 hover:bg-red-700 text-white px-5 py-3 rounded-xl font-bold"
         >
           Cerrar sesión
         </button>
       </div>
 
-      <div className="bg-white text-black max-w-4xl mx-auto rounded-xl p-6 mb-8">
-        <h2 className="text-2xl font-bold mb-4">Solicitudes pendientes</h2>
+      <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        <div className="bg-white text-black rounded-2xl p-4 shadow">
+          <p className="text-sm text-gray-500">Aprobados</p>
+          <p className="text-3xl font-black text-green-700">
+            {totalAprobados}
+          </p>
+        </div>
+
+        <div className="bg-white text-black rounded-2xl p-4 shadow">
+          <p className="text-sm text-gray-500">Pendientes</p>
+          <p className="text-3xl font-black text-yellow-600">
+            {usuariosPendientes.length}
+          </p>
+        </div>
+
+        <div className="bg-white text-black rounded-2xl p-4 shadow">
+          <p className="text-sm text-gray-500">Pronósticos</p>
+          <p className="text-3xl font-black text-blue-700">
+            {totalPronosticos}
+          </p>
+        </div>
+
+        <div className="bg-white text-black rounded-2xl p-4 shadow">
+          <p className="text-sm text-gray-500">Partidos</p>
+          <p className="text-3xl font-black text-purple-700">
+            {partidos.length}
+          </p>
+        </div>
+
+        <div className="bg-white text-black rounded-2xl p-4 shadow col-span-2 md:col-span-1">
+          <p className="text-sm text-gray-500">Resultados</p>
+          <p className="text-3xl font-black text-red-700">
+            {totalResultados}
+          </p>
+        </div>
+      </div>
+
+      <div className="bg-white text-black max-w-6xl mx-auto rounded-2xl p-5 md:p-6 mb-8 shadow">
+        <h2 className="text-2xl font-black mb-4 text-green-900">
+          Solicitudes pendientes
+        </h2>
 
         {usuariosPendientes.length === 0 ? (
           <p>No hay participantes pendientes.</p>
@@ -210,7 +282,7 @@ export default function AdminPage() {
           usuariosPendientes.map((usuario) => (
             <div
               key={usuario.id}
-              className="flex justify-between items-center border-b py-3"
+              className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 border-b py-4"
             >
               <div>
                 <p className="font-bold">{usuario.nombre}</p>
@@ -219,7 +291,7 @@ export default function AdminPage() {
 
               <button
                 onClick={() => aprobarUsuario(usuario.id)}
-                className="bg-green-700 text-white px-4 py-2 rounded-lg"
+                className="bg-green-700 hover:bg-green-800 text-white px-4 py-3 md:py-2 rounded-xl font-bold"
               >
                 Aprobar
               </button>
@@ -228,12 +300,14 @@ export default function AdminPage() {
         )}
       </div>
 
-      <div className="bg-white text-black max-w-4xl mx-auto rounded-xl p-6">
-        <h2 className="text-2xl font-bold mb-4">Resultados Oficiales</h2>
+      <div className="bg-white text-black max-w-6xl mx-auto rounded-2xl p-5 md:p-6 shadow">
+        <h2 className="text-2xl font-black mb-4 text-green-900">
+          Resultados Oficiales
+        </h2>
 
         {partidos.map((partido) => (
-          <div key={partido.id} className="border-b py-4">
-            <p className="font-bold mb-1">
+          <div key={partido.id} className="border-b py-5">
+            <p className="font-black text-lg mb-1">
               {partido.equipo_local} vs {partido.equipo_visitante}
             </p>
 
@@ -241,46 +315,48 @@ export default function AdminPage() {
               {partido.grupo || partido.fase || ''}
             </p>
 
-            <div className="flex gap-3 items-center">
-              <input
-                type="number"
-                className="border p-2 w-20"
-                value={resultados[partido.id]?.local ?? partido.goles_local ?? 0}
-                onChange={(e) =>
-                  setResultados({
-                    ...resultados,
-                    [partido.id]: {
-                      ...resultados[partido.id],
-                      local: e.target.value,
-                    },
-                  })
-                }
-              />
+            <div className="flex flex-col md:flex-row gap-3 md:items-center">
+              <div className="flex gap-3 items-center">
+                <input
+                  type="number"
+                  className="border p-3 rounded-xl w-24 text-center font-bold"
+                  value={resultados[partido.id]?.local ?? partido.goles_local ?? 0}
+                  onChange={(e) =>
+                    setResultados({
+                      ...resultados,
+                      [partido.id]: {
+                        ...resultados[partido.id],
+                        local: e.target.value,
+                      },
+                    })
+                  }
+                />
 
-              <span>-</span>
+                <span className="font-black">-</span>
 
-              <input
-                type="number"
-                className="border p-2 w-20"
-                value={
-                  resultados[partido.id]?.visitante ??
-                  partido.goles_visitante ??
-                  0
-                }
-                onChange={(e) =>
-                  setResultados({
-                    ...resultados,
-                    [partido.id]: {
-                      ...resultados[partido.id],
-                      visitante: e.target.value,
-                    },
-                  })
-                }
-              />
+                <input
+                  type="number"
+                  className="border p-3 rounded-xl w-24 text-center font-bold"
+                  value={
+                    resultados[partido.id]?.visitante ??
+                    partido.goles_visitante ??
+                    0
+                  }
+                  onChange={(e) =>
+                    setResultados({
+                      ...resultados,
+                      [partido.id]: {
+                        ...resultados[partido.id],
+                        visitante: e.target.value,
+                      },
+                    })
+                  }
+                />
+              </div>
 
               <button
                 onClick={() => guardarResultado(partido.id)}
-                className="bg-blue-700 text-white px-4 py-2 rounded-lg"
+                className="bg-blue-700 hover:bg-blue-800 text-white px-5 py-3 rounded-xl font-bold"
               >
                 Guardar resultado
               </button>
