@@ -22,14 +22,7 @@ export default function AdminPage() {
 
   const emailAdmin = data.session.user.email
 
-  if (emailAdmin !== 'jxav_91@hotmail.com') {
-    await supabase.auth.signOut()
-
-    alert('No tienes permisos para acceder al panel administrativo.')
-
-    router.push('/login')
-    return
-  }
+ 
 
   await cargarPartidos()
   await cargarUsuariosPendientes()
