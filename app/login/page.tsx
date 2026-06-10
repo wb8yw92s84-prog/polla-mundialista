@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 
 export default function Login() {
   const router = useRouter()
-
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
@@ -24,9 +23,7 @@ export default function Login() {
     }
 
     if (!data.aprobado) {
-      alert(
-        'Tu cuenta aún no ha sido aprobada. Se activará cuando se confirme el pago.'
-      )
+      alert('Tu cuenta aún no ha sido aprobada. Se activará cuando se confirme el pago.')
       return
     }
 
@@ -37,43 +34,30 @@ export default function Login() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-green-950 to-emerald-800 flex items-center justify-center p-6">
+    <main
+      className="min-h-screen bg-cover bg-center flex items-center justify-center p-6"
+      style={{ backgroundImage: "url('/imagenes/login-mundial-2026.png')" }}
+    >
+      <div className="absolute inset-0 bg-black/35" />
 
-      <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top,_#facc15,_transparent_35%),radial-gradient(circle_at_bottom,_#22c55e,_transparent_40%)]" />
-
-      <div className="relative bg-white/95 backdrop-blur rounded-3xl shadow-2xl p-8 max-w-md w-full border border-yellow-300">
-
-        <div className="flex justify-center mb-5">
-          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-600 flex items-center justify-center shadow-xl">
-            <span className="text-5xl">🏆</span>
-          </div>
-        </div>
-
-        <p className="text-center uppercase tracking-[0.25em] text-green-800 font-black text-sm mb-2">
-          FIFA World Cup 2026
-        </p>
-
-        <h1 className="text-4xl font-black text-center text-green-950 mb-2">
+      <div className="relative bg-black/65 backdrop-blur-md text-white rounded-3xl shadow-2xl p-8 max-w-md w-full border border-yellow-400">
+        <h1 className="text-3xl font-black text-center mb-2">
           Polla Mundialista
         </h1>
 
-        <p className="text-center text-gray-700 font-semibold mb-1">
-          🇺🇸 Estados Unidos · 🇲🇽 México · 🇨🇦 Canadá
-        </p>
-
-        <p className="text-center text-gray-500 mb-8 text-sm">
-          Ingresa con tu cuenta para registrar tus pronósticos
+        <p className="text-center text-yellow-300 font-bold mb-6">
+          USA · México · Canadá 2026
         </p>
 
         <input
-          className="border-2 border-gray-200 focus:border-green-700 outline-none p-4 w-full mb-4 rounded-xl"
+          className="bg-black/50 border border-white/30 p-4 w-full mb-4 rounded-xl text-white placeholder-gray-300 outline-none focus:border-yellow-400"
           placeholder="Correo electrónico"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
 
         <input
-          className="border-2 border-gray-200 focus:border-green-700 outline-none p-4 w-full mb-6 rounded-xl"
+          className="bg-black/50 border border-white/30 p-4 w-full mb-6 rounded-xl text-white placeholder-gray-300 outline-none focus:border-yellow-400"
           type="password"
           placeholder="Contraseña"
           value={password}
@@ -82,22 +66,21 @@ export default function Login() {
 
         <button
           onClick={iniciarSesion}
-          className="bg-green-800 hover:bg-green-900 transition text-white w-full py-4 rounded-xl font-bold text-lg shadow-lg"
+          className="bg-green-600 hover:bg-green-700 text-white w-full py-4 rounded-xl font-black shadow-lg"
         >
-          Ingresar
+          INGRESAR
         </button>
 
         <button
           onClick={() => router.push('/registro')}
-          className="mt-4 bg-yellow-400 hover:bg-yellow-500 transition text-green-950 w-full py-3 rounded-xl font-black"
+          className="mt-4 bg-yellow-400 hover:bg-yellow-500 text-black w-full py-3 rounded-xl font-black"
         >
-          Crear cuenta
+          CREAR CUENTA
         </button>
 
-        <p className="text-center text-xs text-gray-500 mt-6">
+        <p className="text-center text-xs text-gray-300 mt-5">
           Los participantes deben ser aprobados por el administrador.
         </p>
-
       </div>
     </main>
   )
