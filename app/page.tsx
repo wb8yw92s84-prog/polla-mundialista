@@ -14,45 +14,43 @@ export default function Home() {
   }, [router])
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-green-950 to-emerald-800 text-white flex items-center justify-center p-6">
-      <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top,_#facc15,_transparent_35%),radial-gradient(circle_at_bottom,_#22c55e,_transparent_40%)]" />
+    <main className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black p-6">
+      <img
+        src="/login-mundial-2026-v2.png"
+        alt="Mundial 2026"
+        className="absolute inset-0 w-full h-full object-cover"
+      />
 
-      <div className="relative bg-white/95 text-black rounded-3xl shadow-2xl p-8 max-w-md w-full text-center border border-yellow-300">
-        <div className="mx-auto mb-5 w-24 h-24 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-600 flex items-center justify-center shadow-xl">
-          <span className="text-5xl">🏆</span>
-        </div>
+      <div className="absolute inset-0 bg-black/50" />
 
-        <p className="uppercase tracking-[0.25em] text-green-800 font-black text-sm mb-2">
-          Mundial 2026
-        </p>
-
-        <h1 className="text-4xl font-black mb-3 text-green-950">
+      <div className="relative z-10 w-full max-w-md bg-black/70 backdrop-blur-md rounded-3xl border border-yellow-400 p-8 shadow-2xl text-white text-center">
+        <h1 className="text-4xl font-black mb-2">
           Polla Mundialista
         </h1>
 
-        <p className="text-gray-700 mb-2 font-semibold">
-          USA · México · Canadá
+        <p className="text-yellow-300 font-bold mb-4">
+          USA · México · Canadá 2026
         </p>
 
-        <p className="text-gray-600 mb-8">
+        <p className="text-gray-200 mb-8">
           Regístrate, pronostica tus partidos y compite por el primer lugar.
         </p>
 
         <button
           onClick={() => router.push('/login')}
-          className="bg-green-800 hover:bg-green-900 text-white w-full py-3 rounded-full mb-4 font-bold shadow-lg"
+          className="bg-green-600 hover:bg-green-700 text-white w-full py-4 rounded-xl font-black mb-4"
         >
-          Iniciar sesión
+          INICIAR SESIÓN
         </button>
 
         <button
           onClick={() => router.push('/registro')}
-          className="bg-yellow-400 hover:bg-yellow-500 text-green-950 w-full py-3 rounded-full font-black shadow-lg"
+          className="bg-yellow-400 hover:bg-yellow-500 text-black w-full py-4 rounded-xl font-black"
         >
-          Regístrate aquí
+          REGÍSTRATE AQUÍ
         </button>
 
-        <p className="text-xs text-gray-500 mt-6">
+        <p className="text-xs text-gray-300 mt-6">
           Acceso habilitado después de aprobación del administrador.
         </p>
       </div>
