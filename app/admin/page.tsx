@@ -13,21 +13,35 @@ export default function AdminPage() {
   const [cargando, setCargando] = useState(true)
 
   async function verificarSesion() {
-  const { data } = await supabase.auth.getSession()
+    try {
+      const { data } = await supabase.auth.getSession()
 
-  if (!data.session) {
-    router.push('/adminlogin')
-    return
+      if (!data.session) {
+        setCargando(false)
+        router.push('/adminlogin')
+        return
+      }
+
+      const emailAdmin = data.session.user.email?.toLowerCase()
+
+      if (emailAdmin !== 'jxav_91@hotmail.com') {
+        await supabase.auth.signOut()
+        setCargando(false)
+        alert('No tienes permisos para acceder al panel administrativo.')
+        router.push('/adminlogin')
+        return
+      }
+
+      await cargarPartidos()
+      await cargarUsuariosPendientes()
+      setCargando(false)
+    } catch (error) {
+      console.error(error)
+      setCargando(false)
+      alert('Error cargando el panel administrativo.')
+      router.push('/adminlogin')
+    }
   }
-
-  const emailAdmin = data.session.user.email
-
- 
-
-  await cargarPartidos()
-  await cargarUsuariosPendientes()
-  setCargando(false)
-}
 
   async function cerrarSesion() {
     await supabase.auth.signOut()
@@ -155,16 +169,16 @@ export default function AdminPage() {
   }
 
   useEffect(() => {
-  const timeout = setTimeout(async () => {
-    await supabase.auth.signOut()
+    verificarSesion()
 
-    alert('Tu sesión administrativa ha expirado.')
+    const timeout = setTimeout(async () => {
+      await supabase.auth.signOut()
+      alert('Tu sesión administrativa ha expirado.')
+      router.push('/adminlogin')
+    }, 15 * 60 * 1000)
 
-    router.push('/adminlogin')
-  }, 15 * 60 * 1000)
-
-  return () => clearTimeout(timeout)
-}, [])
+    return () => clearTimeout(timeout)
+  }, [])
 
   if (cargando) {
     return (
