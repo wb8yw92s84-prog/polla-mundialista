@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 
 export default function Login() {
   const router = useRouter()
-
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
@@ -30,29 +29,20 @@ export default function Login() {
 
     localStorage.setItem('usuario_id', data.id)
     localStorage.setItem('usuario_nombre', data.nombre)
-
     router.push('/pronosticos')
   }
 
   return (
-    <main className="relative min-h-screen flex items-center justify-start p-6 md:pl-24 overflow-hidden bg-black">
+    <main className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
       <img
         src="/login-mundial-2026.png"
         alt="Fondo Mundial 2026"
         className="absolute inset-0 w-full h-full object-cover"
       />
 
-      <div className="absolute inset-0 bg-black/25" />
+      <div className="absolute inset-0 bg-black/10" />
 
-      <div className="relative z-10 w-full max-w-md bg-black/80 backdrop-blur-md text-white rounded-3xl shadow-2xl p-8 border border-yellow-400 mt-24">
-        <h1 className="text-3xl font-black text-center mb-2">
-          Polla Mundialista
-        </h1>
-
-        <p className="text-center text-yellow-300 font-bold mb-6">
-          USA · México · Canadá 2026
-        </p>
-
+      <div className="relative z-10 w-full max-w-sm bg-black/35 backdrop-blur-sm text-white rounded-3xl shadow-2xl p-6 border border-yellow-400 mt-28">
         <input
           className="bg-black/70 border border-white/40 p-4 w-full mb-4 rounded-xl text-white placeholder-gray-300 outline-none focus:border-yellow-400"
           placeholder="Correo electrónico"
@@ -61,7 +51,7 @@ export default function Login() {
         />
 
         <input
-          className="bg-black/70 border border-white/40 p-4 w-full mb-6 rounded-xl text-white placeholder-gray-300 outline-none focus:border-yellow-400"
+          className="bg-black/70 border border-white/40 p-4 w-full mb-5 rounded-xl text-white placeholder-gray-300 outline-none focus:border-yellow-400"
           type="password"
           placeholder="Contraseña"
           value={password}
@@ -81,10 +71,6 @@ export default function Login() {
         >
           CREAR CUENTA
         </button>
-
-        <p className="text-center text-xs text-gray-300 mt-5">
-          Los participantes deben ser aprobados por el administrador.
-        </p>
       </div>
     </main>
   )
