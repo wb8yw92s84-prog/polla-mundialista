@@ -36,7 +36,7 @@ export default function Login() {
   return (
     <main
       className="min-h-screen bg-cover bg-center flex items-center justify-center p-6"
-      style={{ backgroundImage: "url('/imagenes/login-mundial-2026.png')" }}
+      style={{ backgroundImage: "url('/login-mundial-2026.png')" }}
     >
       <div className="absolute inset-0 bg-black/35" />
 
