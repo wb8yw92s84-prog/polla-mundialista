@@ -26,8 +26,8 @@ export default function AdminLoginPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
-        <h1 className="text-3xl font-bold mb-6 text-center">
+      <div className="bg-slate-900 p-8 rounded-3xl shadow-2xl border border-yellow-500">
+        <h1 className="w-full border border-gray-600 bg-slate-800 text-white p-4 rounded-xl">
           Login Administrador
         </h1>
 
