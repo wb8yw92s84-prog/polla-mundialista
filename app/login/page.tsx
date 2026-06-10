@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 
 export default function Login() {
   const router = useRouter()
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
@@ -23,54 +24,67 @@ export default function Login() {
     }
 
     if (!data.aprobado) {
-      alert('Tu cuenta aún no ha sido aprobada. Se activará cuando se confirme el pago.')
+      alert('Tu cuenta aún no ha sido aprobada.')
       return
     }
 
     localStorage.setItem('usuario_id', data.id)
     localStorage.setItem('usuario_nombre', data.nombre)
+
     router.push('/pronosticos')
   }
 
   return (
-    <main className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
+    <main className="relative min-h-screen flex items-center justify-center overflow-hidden">
+
       <img
-        src="/login-mundial-2026.png"
-        alt="Fondo Mundial 2026"
+        src="/login-mundial-2026-v2.png"
+        alt="Mundial 2026"
         className="absolute inset-0 w-full h-full object-cover"
       />
 
-      <div className="absolute inset-0 bg-black/10" />
+      <div className="absolute inset-0 bg-black/50" />
 
-      <div className="relative z-10 w-full max-w-sm bg-black/35 backdrop-blur-sm text-white rounded-3xl shadow-2xl p-6 border border-yellow-400 mt-28">
+      <div className="relative z-10 w-full max-w-md bg-black/70 backdrop-blur-md rounded-3xl border border-yellow-400 p-8 shadow-2xl">
+
+        <h1 className="text-white text-4xl font-black text-center mb-2">
+          Polla Mundialista
+        </h1>
+
+        <p className="text-center text-yellow-300 mb-8 font-semibold">
+          FIFA World Cup 2026
+        </p>
+
         <input
-          className="bg-black/70 border border-white/40 p-4 w-full mb-4 rounded-xl text-white placeholder-gray-300 outline-none focus:border-yellow-400"
+          type="email"
           placeholder="Correo electrónico"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-4 rounded-xl bg-black/60 border border-gray-500 text-white mb-4"
         />
 
         <input
-          className="bg-black/70 border border-white/40 p-4 w-full mb-5 rounded-xl text-white placeholder-gray-300 outline-none focus:border-yellow-400"
           type="password"
           placeholder="Contraseña"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-4 rounded-xl bg-black/60 border border-gray-500 text-white mb-6"
         />
 
         <button
           onClick={iniciarSesion}
-          className="bg-green-600 hover:bg-green-700 text-white w-full py-4 rounded-xl font-black shadow-lg"
+          className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-bold text-lg"
         >
           INGRESAR
         </button>
 
         <button
           onClick={() => router.push('/registro')}
-          className="mt-4 bg-yellow-400 hover:bg-yellow-500 text-black w-full py-3 rounded-xl font-black"
+          className="w-full mt-4 bg-yellow-400 hover:bg-yellow-500 text-black py-4 rounded-xl font-bold"
         >
           CREAR CUENTA
         </button>
+
       </div>
     </main>
   )
