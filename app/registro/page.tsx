@@ -41,7 +41,8 @@ export default function Registro() {
     <div
       style={{
         minHeight: '100vh',
-        background: '#006b2d',
+        background:
+          'linear-gradient(135deg, #006b2d 0%, #004d1f 50%, #002b11 100%)',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center'
@@ -49,26 +50,65 @@ export default function Registro() {
     >
       <div
         style={{
-          background: 'white',
-          padding: 40,
-          borderRadius: 20,
-          width: 400
+          background: 'rgba(0,0,0,0.85)',
+          padding: '40px',
+          borderRadius: '24px',
+          width: '420px',
+          border: '2px solid #facc15',
+          boxShadow: '0 0 30px rgba(0,0,0,0.4)'
         }}
       >
-        <h1>🏆 Registro Polla Mundialista</h1>
+        <h1
+          style={{
+            color: 'white',
+            textAlign: 'center',
+            marginBottom: '10px',
+            fontSize: '32px',
+            fontWeight: 'bold'
+          }}
+        >
+          🏆 Polla Mundialista
+        </h1>
+
+        <p
+          style={{
+            textAlign: 'center',
+            color: '#facc15',
+            marginBottom: '30px',
+            fontWeight: 'bold'
+          }}
+        >
+          Registro de Participantes
+        </p>
 
         <input
           placeholder="Nombre completo"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
-          style={{ width: '100%', padding: 10, marginTop: 15 }}
+          style={{
+            width: '100%',
+            padding: '14px',
+            marginBottom: '15px',
+            background: '#111',
+            color: 'white',
+            border: '1px solid #555',
+            borderRadius: '12px'
+          }}
         />
 
         <input
-          placeholder="Correo"
+          placeholder="Correo electrónico"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          style={{ width: '100%', padding: 10, marginTop: 15 }}
+          style={{
+            width: '100%',
+            padding: '14px',
+            marginBottom: '15px',
+            background: '#111',
+            color: 'white',
+            border: '1px solid #555',
+            borderRadius: '12px'
+          }}
         />
 
         <input
@@ -76,23 +116,44 @@ export default function Registro() {
           placeholder="Contraseña"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          style={{ width: '100%', padding: 10, marginTop: 15 }}
+          style={{
+            width: '100%',
+            padding: '14px',
+            marginBottom: '20px',
+            background: '#111',
+            color: 'white',
+            border: '1px solid #555',
+            borderRadius: '12px'
+          }}
         />
 
         <button
           onClick={registrar}
           style={{
             width: '100%',
-            padding: 12,
-            marginTop: 20,
-            background: '#006b2d',
-            color: 'white',
+            padding: '14px',
+            background: '#facc15',
+            color: 'black',
             border: 'none',
-            borderRadius: 10
+            borderRadius: '12px',
+            fontWeight: 'bold',
+            fontSize: '16px',
+            cursor: 'pointer'
           }}
         >
-          Registrarme
+          REGISTRARME
         </button>
+
+        <p
+          style={{
+            textAlign: 'center',
+            color: '#d1d5db',
+            marginTop: '20px',
+            fontSize: '12px'
+          }}
+        >
+          Tu cuenta quedará pendiente de aprobación hasta confirmar el pago.
+        </p>
       </div>
     </div>
   )
